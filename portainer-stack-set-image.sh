@@ -43,9 +43,7 @@ STACKFILE=$(
 )
 
 NEW_STACKFILE=$(
-  REGEX='(image: ).*?(\\n)'
-  SUBSTITUTION="\${1}$IMAGE\${2}"
-  printf '%s' "$STACKFILE" | perl -C -ple "s/${REGEX/\//$(echo '\/')}/${SUBSTITUTION/\//$(echo '\/')}/g"
+  printf '%s' "$STACKFILE" | jq --arg image "$IMAGE" 'gsub("(?<=image: ).*?(?=\\r?\\n)"; $image)'
 )
 
 # UPDATE THE STACK > /dev/null beacuse the $ENV contains passwords
