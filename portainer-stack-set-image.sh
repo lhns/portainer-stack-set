@@ -36,7 +36,7 @@ ENDPOINT_ID="$(jq -nr --argjson stack "$STACK" '$stack.EndpointId')"
 # GET THE STACK LIVE FILE
 STACKFILE="$(curl -s -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks/$ID/file" | jq -r '.StackFileContent')"
 
-NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg image "$IMAGE" '$stackfile | gsub("(?<=image: ).*?(?=\\r?\\n)"; $image)')"
+NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg image "$IMAGE" '$stackfile | gsub("(?<=image: ).*?(?=$)"; $image)')"
 
 PAYLOAD="$(jq -nc \
   --arg new_stackfile "$NEW_STACKFILE" \
