@@ -20,23 +20,23 @@ PAYLOAD="$(jq -nc \
   }'
 )"
 
-LOGIN_TOKEN="$(curl -s -H "Content-Type: application/json" -d "$PAYLOAD" -X POST "$HOST/api/auth" | jq -r '.jwt')"
+LOGIN_TOKEN="$(curl -sSf -H "Content-Type: application/json" -d "$PAYLOAD" -X POST "$HOST/api/auth" | jq -r '.jwt')"
 
 # GET STACK ID OF $NAME
 ID="$(
-  curl -s -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks" |
+  curl -sSf -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks" |
     jq -r --arg stackname "$STACKNAME" 'map(select(.Name == $stackname).Id)[]'
 )"
 
-STACK="$(curl -s -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks/$ID")"
+STACK="$(curl -sSf -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks/$ID")"
 
 # GET THE ENDPOINT ID
 ENDPOINT_ID="$(jq -nr --argjson stack "$STACK" '$stack.EndpointId')"
 
 # GET THE STACK LIVE FILE
-STACKFILE="$(curl -s -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks/$ID/file" | jq -r '.StackFileContent')"
+STACKFILE="$(curl -sSf -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks/$ID/file" | jq -r '.StackFileContent')"
 
-NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg image "$IMAGE" '$stackfile | gsub("(?<=image: ).*?(?=$)"; $image)')"
+NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg image "$IMAGE" '$stackfile | gsub("(?<=image: ).*?(?=\\r?\\n|$)"; $image)')"
 
 PAYLOAD="$(jq -nc \
   --arg new_stackfile "$NEW_STACKFILE" \
@@ -49,7 +49,7 @@ PAYLOAD="$(jq -nc \
 )"
 
 # UPDATE THE STACK > /dev/null beacuse the $ENV contains passwords
-curl -s \
+curl -sSf \
      -H 'Content-Type: text/json; charset=utf-8' \
      -H "Authorization: Bearer $LOGIN_TOKEN" \
      -d "$PAYLOAD" \
