@@ -11,7 +11,8 @@ STACKNAME="$4"
 IMAGE="$5"
 
 # GENERATE LOGIN TOKEN
-PAYLOAD="$(jq -nc \
+PAYLOAD="$(
+  jq -nc \
   --arg username "$USERNAME" \
   --arg password "$PASSWORD" \
   '{
@@ -38,19 +39,20 @@ STACKFILE="$(curl -sSf -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks
 
 NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg image "$IMAGE" '$stackfile | gsub("(?<=image: ).*?(?=\\r?\\n|$)"; $image)')"
 
-PAYLOAD="$(jq -nc \
+PAYLOAD="$(
+  jq -nc \
   --arg new_stackfile "$NEW_STACKFILE" \
   --argjson stack "$STACK" \
   '{
-      StackFileContent: $new_stackfile,
-      Env: $stack.Env,
-      Prune: true
-    }'
+    StackFileContent: $new_stackfile,
+    Env: $stack.Env,
+    Prune: true
+  }'
 )"
 
 # UPDATE THE STACK > /dev/null beacuse the $ENV contains passwords
 curl -sSf \
-     -H 'Content-Type: text/json; charset=utf-8' \
-     -H "Authorization: Bearer $LOGIN_TOKEN" \
-     -d "$PAYLOAD" \
-     -X PUT "$HOST/api/stacks/$ID?endpointId=$ENDPOINT_ID" > /dev/null
+-H 'Content-Type: text/json; charset=utf-8' \
+-H "Authorization: Bearer $LOGIN_TOKEN" \
+-d "$PAYLOAD" \
+-X PUT "$HOST/api/stacks/$ID?endpointId=$ENDPOINT_ID" >/dev/null
