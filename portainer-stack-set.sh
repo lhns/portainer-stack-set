@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# https://github.com/matzegebbe/portainer-service-image-update-bash
+# https://github.com/LolHens/portainer-stack-set
+# forked from https://github.com/matzegebbe/portainer-service-image-update-bash
 
 set -eu
 
@@ -9,6 +10,13 @@ USERNAME="$2"
 PASSWORD="$3"
 STACKNAME="$4"
 IMAGE="$5"
+REGEX="$6"
+if [ $# -ge 6 ]
+then
+  REGEX="$6"
+else
+  REGEX='(?<=image: ).*?(?=\r?\n|$)'
+fi
 
 # GENERATE LOGIN TOKEN
 PAYLOAD="$(
@@ -37,7 +45,7 @@ ENDPOINT_ID="$(jq -nr --argjson stack "$STACK" '$stack.EndpointId')"
 # GET THE STACK LIVE FILE
 STACKFILE="$(curl -sSf -H "Authorization: Bearer $LOGIN_TOKEN" "$HOST/api/stacks/$ID/file" | jq -r '.StackFileContent')"
 
-NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg image "$IMAGE" '$stackfile | sub("(?<=image: ).*?(?=\\r?\\n|$)"; $image)')"
+NEW_STACKFILE="$(jq -nr --arg stackfile "$STACKFILE" --arg regex "$REGEX" --arg image "$IMAGE" '$stackfile | sub($regex; $image)')"
 
 PAYLOAD="$(
   jq -nc \
