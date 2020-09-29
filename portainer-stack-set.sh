@@ -10,7 +10,6 @@ USERNAME="$2"
 PASSWORD="$3"
 STACKNAME="$4"
 IMAGE="$5"
-REGEX="$6"
 if [ $# -ge 6 ]
 then
   REGEX="$6"
