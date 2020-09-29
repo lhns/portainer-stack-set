@@ -1,1 +1,1 @@
-# portainer-stack-set-image
+# portainer-stack-set
